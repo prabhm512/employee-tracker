@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
 // Create the connection information for the sql database
 const connection = mysql.createConnection({
@@ -56,7 +57,8 @@ function addNewRecords() {
         }
     ];
     // Stores existing departments
-    const choiceArray = [];
+    const deptArray = [];
+
 
     // Used in inquirer prompt when adding roles.
     const roleAdd = [
@@ -75,13 +77,49 @@ function addNewRecords() {
             message: "What department is this role associated with?",
             name: "roleDept",
             choices: () => {
-                return choiceArray;
+                console.log(deptArray);
+                return deptArray;
             }
         }
     ];
+    // Stores existing roles
+    const roleArray = [];
 
+    // Stores existing managers
+    const managerArray = [];
+    
     // Used in inquirer prompt when adding employees
-    const employeeAdd = [];
+    const employeeAdd = [
+        {
+            title: "input",
+            message: "What is the first name of the employee?",
+            name: "firstName"
+        },
+        {
+            title: "input",
+            message: "What is the last name of the employee?",
+            name: "lastName"
+        },
+        {
+            title: "rawlist",
+            message: "What is the role of the employee?",
+            name: "empRole",
+            choices: () => {
+                console.log(roleArray);
+                return roleArray;
+            },
+        },
+        {
+            title: "rawlist",
+            message: "Who manages the employee?",
+            name: "manager",
+            choices: () => {
+                console.log(managerArray);
+                return managerArray;
+            },
+        }
+    ];
+
 
     inquirer.prompt({
         type: "list",
@@ -97,7 +135,7 @@ function addNewRecords() {
                         console.log(err);
                         console.log("Error when adding departments into the MySQL database");
                     }
-                })
+                });
                 // Give option of adding more records
                 addMoreRecords();
             }).catch((err) => {
@@ -111,22 +149,22 @@ function addNewRecords() {
             connection.query("SELECT id, dept_name FROM department", (err, results) => {
                 if (err) {
                     console.log(err);
-                    console.log("Error when querying database for existing roles.");
+                    console.log("Error when querying database for existing departments.");
                 } else {
-                    // Push each element of returned results into choiceArray
+                    // Push each element of returned results into deptArray
                     results.forEach(element => {
-                        choiceArray.push(element.id + " " + element.dept_name);
+                        deptArray.push(`${element.dept_name} [ID (in db): ${element.id}]`);
                     });
 
                     // Prompt user to add a role
                     inquirer.prompt(roleAdd).then((res) => {
                         // Returns just the id from the roleDept response. Department_id in the emp_role table is an INT.
-                        let deptID = parseInt(res.roleDept.replace(/ .*/, ""));
+                        let deptID = parseInt(res.roleDept.slice(-2));
                         // Insert user answers into emp_role table
                         connection.query("INSERT INTO emp_role (title, salary, department_id) VALUES (?, ?, ?)", [res.roleTitle, res.roleSalary, deptID], (err) => {
                             if (err) {
                                 console.log(err);
-                                console.log("Error when adding departments into the MySQL database");
+                                console.log("Error when adding departments into the MySQL database.");
                             } 
                         })
                         addMoreRecords();
@@ -135,7 +173,52 @@ function addNewRecords() {
                         console.log("Error when adding another role.");
                     });
                 }
-            })
+            });
+        }
+
+        else if (res.addRecords === "Employee") {
+            // Only employees whose manager_id is null will be displayed. 
+            connection.query("SELECT id, first_name, last_name FROM employee WHERE manager_id IS NULL", (empErr, empResults) => {
+                if (empErr) {
+                    console.log(empErr);
+                    console.log("Error when querying database for existing employees whose manager_id is null.");
+                } else {
+                    empResults.forEach(element => {
+                        managerArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
+                    });
+                    
+                }
+            });
+
+            // Query database for existing roles so that user can select employee's role in the company
+            connection.query("SELECT id, title FROM emp_role", (err, results) => {
+                if (err) {
+                    console.log(err);
+                    console.log("Error when querying database for existing roles.");
+                } else {
+                    results.forEach(element => {
+                        roleArray.push(`${element.title} [ID (in db): ${element.id}]`);
+                    });
+
+                    inquirer.prompt(employeeAdd).then((res) => {
+                        // Returns just the db ID from the empRole response. Role_id in table employee is an INT. 
+                        let empRole = parseInt(res.empRole.slice(-2));
+                        // Returns just the db ID from the manager response. Manager_id in table employee is an INT. 
+                        let managerID = parseInt(res.manager.slice(-2));
+
+                        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [res.firstName, res.lastName, empRole, managerID], (err) => {
+                            if (err) {
+                                console.log(err);
+                                console.log("Error when adding departments into the MySQL database.");
+                            } 
+                        })
+                        addMoreRecords();
+                    }).catch((err) => {
+                        console.log(err);
+                        console.log("Error when adding records to employee table.");
+                    });
+                }
+            }); 
         }
     }).catch((err) => {
         console.log(err);
