@@ -47,7 +47,64 @@ function start() {
 }
 
 function addNewRecords() {
+    const deptAdd = [
+        {
+            type: "input",
+            message: "What is the department name?",
+            name: "deptName"
+        }
+    ];
+    const roleAdd = [];
+    const employeeAdd = [];
 
+    inquirer.prompt({
+        type: "list",
+        message: "What would you like to ADD?",
+        name: "addRecords",
+        choices: ["Department", "Role", "Employee"]
+    }).then((res) => {
+        if (res.addRecords === "Department") {
+            // Prompt what the user would like to add
+            inquirer.prompt(deptAdd).then((res) => {
+                connection.query("INSERT INTO department (dept_name) VALUES (?)", [res.deptName], (err) => {
+                    if (err) {
+                        console.log(err);
+                        console.log("Error when adding departments into the MySQL database");
+                    }
+                })
+
+                // Give option of adding more records
+                addMoreRecords();
+            }).catch((err) => {
+                console.log(err);
+                console.log("Error when adding another department.");
+            });
+        }
+ 
+    }).catch((err) => {
+        console.log(err);
+        console.log("Error when selecting what to ADD.");
+    });
+}
+
+function addMoreRecords() {
+    // Give user the option to add another department
+    inquirer.prompt({
+        type: "list",
+        message: "Would you like to add more records?",
+        name: "addMore",
+        choices: ["YES", "NO"]
+    }).then((res) => {
+        if (res.addMore === "YES") {
+            addNewRecords();
+        }
+        else {
+            start();
+        }
+    }).catch((err) => {
+         console.log(err);
+         console.log("Error when adding a second department.");
+    });
 }
 
 function viewRecords() {
