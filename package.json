@@ -1,0 +1,26 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "A CLI app that allows easy management of employee data.",
+  "main": "emptracker.js",
+  "dependencies": {
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node ./emptracker.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prabhm512/employee-tracker.git"
+  },
+  "keywords": [],
+  "author": "Prabh Singh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/prabhm512/employee-tracker/issues"
+  },
+  "homepage": "https://github.com/prabhm512/employee-tracker#readme"
+}
