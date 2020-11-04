@@ -47,6 +47,7 @@ function start() {
 }
 
 function addNewRecords() {
+    // Used in inquirer prompt when adding department
     const deptAdd = [
         {
             type: "input",
@@ -54,7 +55,32 @@ function addNewRecords() {
             name: "deptName"
         }
     ];
-    const roleAdd = [];
+    // Stores existing departments
+    const choiceArray = [];
+
+    // Used in inquirer prompt when adding roles.
+    const roleAdd = [
+        {
+            type: "input",
+            message: "What is the title of the new role?",
+            name: "roleTitle"
+        },
+        {
+            type: "input",
+            message: "What salary will an employee get in this role?",
+            name: "roleSalary"
+        },
+        {
+            type: "rawlist",
+            message: "What department is this role associated with?",
+            name: "roleDept",
+            choices: () => {
+                return choiceArray;
+            }
+        }
+    ];
+
+    // Used in inquirer prompt when adding employees
     const employeeAdd = [];
 
     inquirer.prompt({
@@ -72,7 +98,6 @@ function addNewRecords() {
                         console.log("Error when adding departments into the MySQL database");
                     }
                 })
-
                 // Give option of adding more records
                 addMoreRecords();
             }).catch((err) => {
@@ -80,7 +105,38 @@ function addNewRecords() {
                 console.log("Error when adding another department.");
             });
         }
- 
+
+        else if (res.addRecords === "Role") {
+            // Query database for existing departments so that user can select which department to add employee in.
+            connection.query("SELECT id, dept_name FROM department", (err, results) => {
+                if (err) {
+                    console.log(err);
+                    console.log("Error when querying database for existing roles.");
+                } else {
+                    // Push each element of returned results into choiceArray
+                    results.forEach(element => {
+                        choiceArray.push(element.id + " " + element.dept_name);
+                    });
+
+                    // Prompt user to add a role
+                    inquirer.prompt(roleAdd).then((res) => {
+                        // Returns just the id from the roleDept response. Department_id in the emp_role table is an INT.
+                        let deptID = parseInt(res.roleDept.replace(/ .*/, ""));
+                        // Insert user answers into emp_role table
+                        connection.query("INSERT INTO emp_role (title, salary, department_id) VALUES (?, ?, ?)", [res.roleTitle, res.roleSalary, deptID], (err) => {
+                            if (err) {
+                                console.log(err);
+                                console.log("Error when adding departments into the MySQL database");
+                            } 
+                        })
+                        addMoreRecords();
+                    }).catch((err) => {
+                        console.log(err);
+                        console.log("Error when adding another role.");
+                    });
+                }
+            })
+        }
     }).catch((err) => {
         console.log(err);
         console.log("Error when selecting what to ADD.");
