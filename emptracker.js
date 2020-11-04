@@ -220,11 +220,15 @@ function addNewRecords() {
                 }
             }); 
         }
+
+        else {
+            connection.end();
+        }
     }).catch((err) => {
         console.log(err);
         console.log("Error when selecting what to ADD.");
     });
-}
+};
 
 function addMoreRecords() {
     // Give user the option to add another department
@@ -244,11 +248,64 @@ function addMoreRecords() {
          console.log(err);
          console.log("Error when adding a second department.");
     });
-}
+};
 
 function viewRecords() {
+    inquirer.prompt({
+        title: "rawlist",
+        message: "What would you like to VIEW?",
+        name: "viewRecords",
+        suffix: " Type departments, roles or employees",
+        validate: (str) => {
+            if (str === "departments" || str === "roles" || str === "employees") {
+                return true;
+            } else {
+                return "Please enter either 'departments', 'roles' or 'employees'";
+            }
+        },
+        choices: ["departments", "roles", "employees"],
+    }).then((res) => {
+        if (res.viewRecords === "departments") {
+            connection.query("SELECT * FROM department", (err, results) => {
+                if (err) {
+                    console.log(err);
+                    console.log("Error when viewing departments.");
+                } else {
+                    console.table(results);
+                }
+            })
+        }
 
-}
+        else if (res.viewRecords === "roles") {
+            connection.query("SELECT * FROM emp_role", (err, results) => {
+                if (err) {
+                    console.log(err);
+                    console.log("Error when viewing roles.");
+                } else {
+                    console.table(results);
+                }
+            })
+        }
+
+        else if (res.viewRecords === "employees") {
+            connection.query("SELECT * FROM employee", (err, results) => {
+                if (err) {
+                    console.log(err);
+                    console.log("Error when viewing employees.");
+                } else {
+                    console.table(results);
+                }
+            })
+        }
+
+        else {
+            connection.end();
+        }
+    }).catch((err) => {
+        console.log(err);
+        console.log("Error when view database records");
+    });
+};
 
 function updateExistingRecords() {
 
