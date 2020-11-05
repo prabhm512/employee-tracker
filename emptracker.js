@@ -3,6 +3,9 @@ const inquirer = require("inquirer");
 const queries = require("./assets/js/redundantQueries")
 inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
+// Stores existing employees
+const empID = [];
+
 // Create the connection information for the sql database
 const connection = mysql.createConnection({
     host: "localhost",
@@ -162,15 +165,11 @@ function addNewRoles() {
 }
 
 function addNewEmployees() {
-        // Stores existing roles
-        const roleArray = [];
-        // Stores existing role ID's
-        const roleID = [];
 
-        // Stores existing managers
-        const managerArray = [];
-        // Stores existing manager ID's
-        const managerID = [];
+    // Stores existing managers
+    const managerArray = [];
+    // Stores existing manager ID's
+    const managerID = [];
         
         // Used in inquirer prompt when adding employees
         const employeeAdd = [
@@ -189,7 +188,7 @@ function addNewEmployees() {
                 message: "What is the role of the employee?",
                 name: "empRole",
                 validate: (inputID) => {
-                    if (roleID.indexOf(parseInt(inputID)) !== -1) {
+                    if (queries.roleID.indexOf(parseInt(inputID)) !== -1) {
                         return true;
                     } else {
                         return "Input not in 'id' column of table.";
@@ -198,7 +197,7 @@ function addNewEmployees() {
                 suffix: " Type in an ID from the table above",
                 choices: () => {
                     console.table(queries.roles._results[0]);
-                    return roleArray;
+                    return queries.roleArray;
                 },
             },
             {
@@ -241,14 +240,6 @@ function addNewEmployees() {
         }
     });
 
-    // Get title and id from query in redundantQueries.js and push in to roleArray
-    queries.roles._results.forEach(elements => {
-        elements.forEach(el => {
-            roleArray.push(`${el.title} [ID (in db): ${el.id}]`);
-            roleID.push(el.id);
-        })
-    })
-
     inquirer.prompt(employeeAdd).then((res) => {
         // Returns just the db ID from the empRole response. Role_id in table employee is an INT. 
         let empRole = parseInt(res.empRole.slice(-2));
@@ -272,5 +263,57 @@ function addNewEmployees() {
 
 function updateRoles() {
 
+    // Push all employees into empArray
+    queries.employees._results[0].forEach(element => {
+        empID.push(element.id);
+    })
+    inquirer.prompt([
+        {
+            title: "rawlist",
+            message: "Which employees role would you like to update?",
+            name: "employeeID",
+            suffix: " Type in an ID from the table above -->",
+            validate: (inputID) => {
+                if (empID.indexOf(parseInt(inputID)) !== -1) {
+                    return true;
+                } else {
+                    return "Input not in 'id' column of table.";
+                }
+            },
+            choices: () => {
+                console.table(queries.employees._results[0]);
+                return JSON.stringify(queries.employees._results[0]);
+            }
+        },
+        {
+            title: "input",
+            messages: "What role would you like to give to the employee?",
+            name: "empRoleID",
+            suffix: " Type in an ID from the table above -->",
+            validate: (inputID) => {
+                if (queries.roleID.indexOf(parseInt(inputID)) !== -1) {
+                    return true;
+                } else {
+                    return "Input not in 'id' column of table." 
+                }
+            },
+            choices: () => {
+                console.table(queries.roles._results[0]);
+                return JSON.stringify(queries.roles._results[0]);
+            }
+        }
+    ]).then((res) => {
+        // Update role_ID of selected employee
+        connection.query("UPDATE employee SET role_id = ? WHERE id = ?", [res.empRoleID, res.employeeID], (err) => {
+            if (err) throw err;
+        });
+        // Prompt initial questions again
+        start();
+    }).catch((err) => {
+        if (err) {
+            console.log(err);
+            console.log("Error when updating roles.");
+        }
+    });
 }
 
