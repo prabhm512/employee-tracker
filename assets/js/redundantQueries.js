@@ -1,5 +1,11 @@
 const mysql = require("mysql");
 
+// Stores all role ID's
+const roleID = [];
+
+// Stores all roles
+const roleArray = [];
+
 // Create the connection information for the sql database
 const connection = mysql.createConnection({
     host: "localhost",
@@ -25,12 +31,18 @@ let departments = connection.query("SELECT * FROM department", (err, resutls) =>
     return resutls;
 })
 
-let roles = connection.query("SELECT * FROM emp_role", (err, resutls) => {
+let roles = connection.query("SELECT * FROM emp_role", (err, results) => {
     if (err) {
         console.log(err);
         console.log("Error when querying database for all roles.");
     }
-    return resutls;
+
+    // Get title and id from query in redundantQueries.js and push in to roleArray
+    results.forEach(element => {
+            roleArray.push(`${element.title} [ID (in db): ${element.id}]`);
+            roleID.push(element.id);
+    })
+    return results;
 })
 
 let employees = connection.query("SELECT * FROM employee", (err, resutls) => {
@@ -41,6 +53,7 @@ let employees = connection.query("SELECT * FROM employee", (err, resutls) => {
     return resutls;
 })
 
+
 connection.end();
 
-module.exports = { departments, roles, employees };
+module.exports = { departments, roles, employees, roleID, roleArray };
