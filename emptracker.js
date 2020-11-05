@@ -164,9 +164,13 @@ function addNewRoles() {
 function addNewEmployees() {
         // Stores existing roles
         const roleArray = [];
+        // Stores existing role ID's
+        const roleID = [];
 
         // Stores existing managers
         const managerArray = [];
+        // Stores existing manager ID's
+        const managerID = [];
         
         // Used in inquirer prompt when adding employees
         const employeeAdd = [
@@ -184,7 +188,16 @@ function addNewEmployees() {
                 title: "rawlist",
                 message: "What is the role of the employee?",
                 name: "empRole",
+                validate: (inputID) => {
+                    if (roleID.indexOf(parseInt(inputID)) !== -1) {
+                        return true;
+                    } else {
+                        return "Input not in 'id' column of table.";
+                    }
+                },
+                suffix: " Type in an ID from the table above",
                 choices: () => {
+                    console.table(queries.roles._results[0]);
                     return roleArray;
                 },
             },
@@ -192,7 +205,16 @@ function addNewEmployees() {
                 title: "rawlist",
                 message: "Who manages the employee?",
                 name: "manager",
+                validate: (inputID) => {
+                    if (managerID.indexOf(parseInt(inputID)) !== -1) {
+                        return true;
+                    } else {
+                        return "Input not in 'id' column of table.";
+                    }
+                },
+                suffix: " Type in an ID from the table above",
                 choices: () => {
+                    console.table(managerArray);
                     return managerArray;
                 },
             }
@@ -205,7 +227,15 @@ function addNewEmployees() {
             console.log("Error when querying database for existing employees whose manager_id is null.");
         } else {
             empResults.forEach(element => {
-                managerArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
+                // managerArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
+                managerArray.push(
+                    {   
+                        id: element.id,
+                        first_name: element.first_name,
+                        last_name: element.last_name
+                    }
+                )
+                managerID.push(element.id);
             });
                     
         }
@@ -215,6 +245,7 @@ function addNewEmployees() {
     queries.roles._results.forEach(elements => {
         elements.forEach(el => {
             roleArray.push(`${el.title} [ID (in db): ${el.id}]`);
+            roleID.push(el.id);
         })
     })
 
