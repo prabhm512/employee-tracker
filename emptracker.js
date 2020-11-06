@@ -1,7 +1,8 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-const queries = require("./assets/js/redundantQueries")
-inquirer.registerPrompt("search-list", require("inquirer-search-list"));
+const queries = require("./assets/js/allSelectQueries");
+const arrays = require("./assets/js/arrays");
+// inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
 // Create the connection information for the sql database
 const connection = mysql.createConnection({
@@ -21,15 +22,7 @@ connection.connect((err) => {
 
 // Initial Prompt
 function start() {
-    inquirer.prompt([
-        {
-            type: "list",
-            message: "What would you like to do?",
-            name: "action",
-            choices: ["ADD departments", "ADD roles", "ADD employees", "VIEW departments", "VIEW roles", "VIEW employees", "UPDATE employee roles", "EXIT"],
-            loop: false 
-        }
-    ]).then((res) => {
+    inquirer.prompt(arrays.startPrompt).then((res) => {
         switch (res.action) {
             case "ADD departments": 
                 addNewDepartments();
@@ -73,16 +66,9 @@ function start() {
 }
 
 function addNewDepartments() {
-    // Used in inquirer prompt when adding department
-    const deptAdd = [
-        {
-            type: "input",
-            message: "What is the department name?",
-            name: "deptName"
-        }
-    ];
+
     // Prompt what the user would like to add
-        inquirer.prompt(deptAdd).then((res) => {
+        inquirer.prompt(arrays.deptAdd).then((res) => {
             connection.query("INSERT INTO department (dept_name) VALUES (?)", [res.deptName], (err) => {
                 if (err) {
                     console.log(err);
@@ -101,117 +87,29 @@ function addNewDepartments() {
 
 function addNewRoles() {
 
-    // Stores existing departments
-    const deptArray = [];
-
-    // Used in inquirer prompt when adding roles.
-    const roleAdd = [
-        {
-            type: "input",
-            message: "What is the title of the new role?",
-            name: "roleTitle"
-        },
-        {
-            type: "input",
-            message: "What salary will an employee get in this role?",
-            name: "roleSalary"
-        },
-        {
-            type: "rawlist",
-            message: "What department is this role associated with?",
-            name: "roleDept",
-            choices: () => {
-                return deptArray;
-            },
-            loop: false
-        }
-    ];
-
-    // Query database for existing departments so that user can select which department to add employee in.
-    connection.query("SELECT id, dept_name FROM department", (err, results) => {
-        if (err) {
-            console.log(err);
-            console.log("Error when querying database for existing departments.");
-        } else {
-            // Push each element of returned results into deptArray
-            results.forEach(element => {
-                deptArray.push(`${element.dept_name} [ID (in db): ${element.id}]`);
-            });
-
-            // Prompt user to add a role
-            inquirer.prompt(roleAdd).then((res) => {
-                // Returns just the id from the roleDept response. Department_id in the emp_role table is an INT.
-                let deptID = parseInt(res.roleDept.slice(-2));
-                // Insert user answers into emp_role table
-                connection.query("INSERT INTO emp_role (title, salary, department_id) VALUES (?, ?, ?)", [res.roleTitle, res.roleSalary, deptID], (err) => {
-                    if (err) {
-                        console.log(err);
-                        console.log("Error when adding departments into the MySQL database.");
-                    } 
-                })
-
-                // Prompt start options again 
-                start();
-
-            }).catch((err) => {
+    // Prompt user to add a role
+    inquirer.prompt(arrays.roleAdd).then((res) => {
+        // Returns just the id from the roleDept response. Department_id in the emp_role table is an INT.
+        let deptID = parseInt(res.roleDept.slice(-2));
+        // Insert user answers into emp_role table
+        connection.query("INSERT INTO emp_role (title, salary, department_id) VALUES (?, ?, ?)", [res.roleTitle, res.roleSalary, deptID], (err) => {
+            if (err) {
                 console.log(err);
-                console.log("Error when adding another role.");
-            });
-        }
+                console.log("Error when adding departments into the MySQL database.");
+            } 
+        })
+
+        // Prompt start options again 
+        start();
+    }).catch((err) => {
+        console.log(err);
+        console.log("Error when adding another role.");
     });
 }
 
 function addNewEmployees() {
-
-    // Stores existing managers
-    const managerArray = [];
         
-    // Used in inquirer prompt when adding employees
-    const employeeAdd = [
-        {
-            type: "input",
-            message: "What is the first name of the employee?",
-            name: "firstName"
-        },
-        {
-            type: "input",
-            message: "What is the last name of the employee?",
-            name: "lastName"
-        },
-        {
-            type: "rawlist",
-            message: "What is the role of the employee?",
-            name: "empRole",
-            choices: () => {
-                return queries.roleArray;
-            },
-            loop: false
-        },
-        {
-            type: "rawlist",
-            message: "Who manages the employee?",
-            name: "manager",
-            choices: () => {
-                return managerArray;
-            },
-            loop: false
-        }
-    ];
-
-    // Only employees whose manager_id is null will be displayed. 
-    connection.query("SELECT id, first_name, last_name FROM employee WHERE manager_id IS NULL", (empErr, empResults) => {
-        if (empErr) {
-            console.log(empErr);
-            console.log("Error when querying database for existing employees whose manager_id is null.");
-        } else {
-            empResults.forEach(element => {
-                managerArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
-            });
-                    
-        }
-    });
-
-    inquirer.prompt(employeeAdd).then((res) => {
+    inquirer.prompt(arrays.employeeAdd).then((res) => {
         // Returns just the db ID from the empRole response. Role_id in table employee is an INT. 
         let empRole = parseInt(res.empRole.slice(-2));
         // Returns just the db ID from the manager response. Manager_id in table employee is an INT. 
@@ -234,33 +132,7 @@ function addNewEmployees() {
 
 function updateRoles() {
 
-    // Stores all employees.
-    const empArray = [];
-
-    // Push all employees into empArray
-    queries.employees._results[0].forEach(element => {
-        empArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
-    })
-    inquirer.prompt([
-        {
-            type: "rawlist",
-            message: "Which employees role would you like to update?",
-            name: "employeeID",
-            choices: () => {
-                return empArray;
-            },
-            loop: false
-        },
-        {
-            type: "rawlist",
-            message: "What role would you like to give to the employee?",
-            name: "empRoleID",
-            choices: () => {
-                return queries.roleArray;
-            },
-            loop: false
-        }
-    ]).then((res) => {
+    inquirer.prompt(arrays.updateRolesArray).then((res) => {
 
         let empID = parseInt(res.employeeID.slice(-2));
         let roleID = parseInt(res.empRoleID.slice(-2));
