@@ -23,12 +23,11 @@ const connection = mysql.createConnection({
 
 // ***********
 
-let departments = connection.query("SELECT * FROM department", (err, resutls) => {
+let departments = connection.query("SELECT * FROM department", (err, results) => {
     if (err) {
         console.log(err);
         console.log("Error when querying database for all departments.");
     }
-    return resutls;
 })
 
 let roles = connection.query("SELECT * FROM emp_role", (err, results) => {
@@ -42,15 +41,13 @@ let roles = connection.query("SELECT * FROM emp_role", (err, results) => {
             roleArray.push(`${element.title} [ID (in db): ${element.id}]`);
             roleID.push(element.id);
     })
-    return results;
 })
 
-let employees = connection.query("SELECT * FROM employee", (err, resutls) => {
+let employees = connection.query("SELECT * FROM employee", (err, results) => {
     if (err) {
         console.log(err);
         console.log("Error when querying database for all employees.");
     }
-    return resutls;
 })
 
 
