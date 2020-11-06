@@ -3,9 +3,6 @@ const inquirer = require("inquirer");
 const queries = require("./assets/js/redundantQueries")
 inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
-// Stores existing employees
-const empID = [];
-
 // Create the connection information for the sql database
 const connection = mysql.createConnection({
     host: "localhost",
@@ -124,9 +121,9 @@ function addNewRoles() {
             message: "What department is this role associated with?",
             name: "roleDept",
             choices: () => {
-                console.log(deptArray);
                 return deptArray;
-            }
+            },
+            loop: false
         }
     ];
 
@@ -168,56 +165,38 @@ function addNewEmployees() {
 
     // Stores existing managers
     const managerArray = [];
-    // Stores existing manager ID's
-    const managerID = [];
         
-        // Used in inquirer prompt when adding employees
-        const employeeAdd = [
-            {
-                title: "input",
-                message: "What is the first name of the employee?",
-                name: "firstName"
+    // Used in inquirer prompt when adding employees
+    const employeeAdd = [
+        {
+            type: "input",
+            message: "What is the first name of the employee?",
+            name: "firstName"
+        },
+        {
+            type: "input",
+            message: "What is the last name of the employee?",
+            name: "lastName"
+        },
+        {
+            type: "rawlist",
+            message: "What is the role of the employee?",
+            name: "empRole",
+            choices: () => {
+                return queries.roleArray;
             },
-            {
-                title: "input",
-                message: "What is the last name of the employee?",
-                name: "lastName"
+            loop: false
+        },
+        {
+            type: "rawlist",
+            message: "Who manages the employee?",
+            name: "manager",
+            choices: () => {
+                return managerArray;
             },
-            {
-                title: "rawlist",
-                message: "What is the role of the employee?",
-                name: "empRole",
-                validate: (inputID) => {
-                    if (queries.roleID.indexOf(parseInt(inputID)) !== -1) {
-                        return true;
-                    } else {
-                        return "Input not in 'id' column of table.";
-                    }
-                },
-                suffix: " Type in an ID from the table above",
-                choices: () => {
-                    console.table(queries.roles._results[0]);
-                    return queries.roleArray;
-                },
-            },
-            {
-                title: "rawlist",
-                message: "Who manages the employee?",
-                name: "manager",
-                validate: (inputID) => {
-                    if (managerID.indexOf(parseInt(inputID)) !== -1) {
-                        return true;
-                    } else {
-                        return "Input not in 'id' column of table.";
-                    }
-                },
-                suffix: " Type in an ID from the table above",
-                choices: () => {
-                    console.table(managerArray);
-                    return managerArray;
-                },
-            }
-        ];
+            loop: false
+        }
+    ];
 
     // Only employees whose manager_id is null will be displayed. 
     connection.query("SELECT id, first_name, last_name FROM employee WHERE manager_id IS NULL", (empErr, empResults) => {
@@ -226,15 +205,7 @@ function addNewEmployees() {
             console.log("Error when querying database for existing employees whose manager_id is null.");
         } else {
             empResults.forEach(element => {
-                // managerArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
-                managerArray.push(
-                    {   
-                        id: element.id,
-                        first_name: element.first_name,
-                        last_name: element.last_name
-                    }
-                )
-                managerID.push(element.id);
+                managerArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
             });
                     
         }
@@ -263,48 +234,39 @@ function addNewEmployees() {
 
 function updateRoles() {
 
+    // Stores all employees.
+    const empArray = [];
+
     // Push all employees into empArray
     queries.employees._results[0].forEach(element => {
-        empID.push(element.id);
+        empArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
     })
     inquirer.prompt([
         {
-            title: "rawlist",
+            type: "rawlist",
             message: "Which employees role would you like to update?",
             name: "employeeID",
-            suffix: " Type in an ID from the table above -->",
-            validate: (inputID) => {
-                if (empID.indexOf(parseInt(inputID)) !== -1) {
-                    return true;
-                } else {
-                    return "Input not in 'id' column of table.";
-                }
-            },
             choices: () => {
-                console.table(queries.employees._results[0]);
-                return JSON.stringify(queries.employees._results[0]);
-            }
+                return empArray;
+            },
+            loop: false
         },
         {
-            title: "input",
-            messages: "What role would you like to give to the employee?",
+            type: "rawlist",
+            message: "What role would you like to give to the employee?",
             name: "empRoleID",
-            suffix: " Type in an ID from the table above -->",
-            validate: (inputID) => {
-                if (queries.roleID.indexOf(parseInt(inputID)) !== -1) {
-                    return true;
-                } else {
-                    return "Input not in 'id' column of table." 
-                }
-            },
             choices: () => {
-                console.table(queries.roles._results[0]);
-                return JSON.stringify(queries.roles._results[0]);
-            }
+                return queries.roleArray;
+            },
+            loop: false
         }
     ]).then((res) => {
+
+        let empID = parseInt(res.employeeID.slice(-2));
+        let roleID = parseInt(res.empRoleID.slice(-2));
+
         // Update role_ID of selected employee
-        connection.query("UPDATE employee SET role_id = ? WHERE id = ?", [res.empRoleID, res.employeeID], (err) => {
+        connection.query("UPDATE employee SET role_id = ? WHERE id = ?", [roleID, empID], (err) => {
             if (err) throw err;
         });
         // Prompt initial questions again
