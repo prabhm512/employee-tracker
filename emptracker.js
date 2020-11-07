@@ -2,7 +2,6 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const queries = require("./assets/js/allSelectQueries");
 const arrays = require("./assets/js/arrays");
-// const { roleArray, empArray } = require("./assets/js/arrays");
 // inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
 // Create the connection information for the sql database
@@ -63,9 +62,9 @@ function start() {
                 deleteDepartment();
                 break;
             
-            // case "DELETE role":
-            //     deleteRole();
-            //     break;
+            case "DELETE role":
+                deleteRole();
+                break;
             
             default:
                 connection.end();
@@ -319,3 +318,29 @@ function deleteDepartment() {
     })
 }
 
+// Delete a role from the database
+function deleteRole() {
+    inquirer.prompt(
+        {
+            type: "list",
+            message: "What role would you like to DELETE?",
+            name: "deleteRole",
+            choices: () => arrays.roleArray,
+            loop: false
+        }
+    ).then(res => {
+        let roleID = parseInt(res.deleteRole.split(")")[0]);
+        
+        // Check if an employee is working in this role. 
+        // Cannot delete role if there is an employee assigned to that role.
+        connection.query("DELETE FROM emp_role WHERE id = ?", [roleID], (err, results) => {
+            if (err) {
+                console.log(err);
+                console.warn("An employee currently works in this role! Delete the employee or Update the employee role first.");
+            } else {
+                console.log("Role successfully deleted! Please EXIT and rerun the program to view the changes.");
+            }
+            start();
+        })
+    }) 
+}

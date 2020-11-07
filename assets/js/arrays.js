@@ -16,7 +16,7 @@
             type: "list",
             message: "What would you like to do?",
             name: "action",
-            choices: ["ADD departments", "ADD roles", "ADD employees", "VIEW departments", "VIEW roles", "VIEW employees", "UPDATE employee roles", "UPDATE employee manager", "DELETE department", "EXIT"],
+            choices: ["ADD departments", "ADD roles", "ADD employees", "VIEW departments", "VIEW roles", "VIEW employees", "UPDATE employee roles", "UPDATE employee manager", "DELETE department", "DELETE role", "EXIT"],
             loop: false 
         }
     ];
