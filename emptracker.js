@@ -161,7 +161,7 @@ function viewEmployees() {
             type: "rawlist",
             message: "How would you like to VIEW employees?",
             name: "empViewOptions",
-            choices: ["By department", "By role", "By name", "All employees"]
+            choices: ["By department", "By role", "By manager", "By name", "All employees"]
         }
     ).then(res => {
         if (res.empViewOptions === "By department") {
@@ -210,6 +210,27 @@ function viewEmployees() {
 
                     start();
                 })
+            })
+        }
+
+        else if (res.empViewOptions === "By manager") {
+            inquirer.prompt(
+                {
+                    type: "list", 
+                    message: "Select a manager",
+                    name: "viewByManager",
+                    choices: () => arrays.managerArray
+                }
+            ).then(res => {
+                let managerID = parseInt(res.viewByManager.slice(-2));
+                connection.query(`${queries.employees.sql} WHERE manager_id = ?`, [managerID], (err, results) => {
+                    if (err) throw err;
+                    console.table(results)
+                    start();
+                })
+            }).catch(err => {
+                console.log(err);
+                console.log("Error when viewing employees by manager.");
             })
         }
 
