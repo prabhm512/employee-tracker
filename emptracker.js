@@ -66,6 +66,10 @@ function start() {
                 deleteRole();
                 break;
             
+            case "DELETE employees":
+                deleteEmployees();
+                break;
+            
             default:
                 connection.end();
         }
@@ -330,7 +334,7 @@ function deleteRole() {
         }
     ).then(res => {
         let roleID = parseInt(res.deleteRole.split(")")[0]);
-        
+
         // Check if an employee is working in this role. 
         // Cannot delete role if there is an employee assigned to that role.
         connection.query("DELETE FROM emp_role WHERE id = ?", [roleID], (err, results) => {
@@ -343,4 +347,23 @@ function deleteRole() {
             start();
         })
     }) 
+}
+
+function deleteEmployees() {
+    inquirer.prompt(
+        {
+            type: "list",
+            message: "Which employee would you like to delete?",
+            name: "deleteEmp",
+            choices: () => arrays.empArray,
+            loop: false
+        }
+    ).then(res => {
+        let empID = parseInt(res.deleteEmp.split(")")[0]);
+        connection.query("DELETE FROM employee WHERE id = ?", [empID], (err) => {
+            if (err) throw err;
+
+            start();
+        })  
+    })
 }
