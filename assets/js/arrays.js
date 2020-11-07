@@ -1,8 +1,14 @@
     // Stores existing departments
     const deptArray = [];
 
+    // Stores only the dept_name from arrays.deptArray
+    const filteredDeptArray = [];
+
     // Stores all roles
     const roleArray = [];
+
+    // Stores only the title from arrays.roleArray
+    const filteredRoleArray = [];
 
     // Stores all employees.
     const empArray = [];
@@ -26,7 +32,20 @@
         {
             type: "input",
             message: "What is the department name?",
-            name: "deptName"
+            name: "deptName",
+            validate: (str) => {
+                // Filters deptArray to store only dept_name
+                deptArray.filter(el => {
+                    filteredDeptArray.push(el.split(" ")[1]);
+                })
+                
+                // Validation to ensure 1 department is only added once to the database.
+                if (filteredDeptArray.indexOf(str.toLowerCase()) === -1) {
+                    return true;
+                } else {
+                    return "This department already exists!";
+                }
+            }
         }
     ];
 
@@ -36,7 +55,21 @@
         {
             type: "input",
             message: "What is the title of the new role?",
-            name: "roleTitle"
+            name: "roleTitle",
+            validate: (str) => {
+                // Filters deptArray to store only dept_name
+                roleArray.filter(el => {
+                filteredRoleArray.push(el.split(") ")[1]);
+                })
+
+                // Validation to ensure 1 role is only added once to the database.
+                // One role can be assigned to multiple employees but the emp_role table cannot have duplicate values.
+                if (filteredRoleArray.indexOf(str.toLowerCase()) === -1) {
+                    return true;
+                } else {
+                    return "This role already exists!";
+                }
+            }
         },
         {
             type: "input",
@@ -129,4 +162,4 @@
     ];
 
 
-module.exports = { deptArray, roleArray, empArray, managerArray, startPrompt, deptAdd, roleAdd, employeeAdd, updateRolesArray, updateManager };
+module.exports = { deptArray, filteredDeptArray, roleArray, filteredRoleArray, empArray, managerArray, startPrompt, deptAdd, roleAdd, employeeAdd, updateRolesArray, updateManager };

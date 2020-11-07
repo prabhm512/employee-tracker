@@ -83,16 +83,17 @@ function start() {
 function addNewDepartments() {
 
     // Prompt what the user would like to add
-        inquirer.prompt(arrays.deptAdd).then((res) => {
-            connection.query("INSERT INTO department (dept_name) VALUES (?)", [res.deptName], (err) => {
-                if (err) {
-                    console.log(err);
-                    console.log("Error when adding departments into the MySQL database");
-                }
-            });
+    inquirer.prompt(arrays.deptAdd).then((res) => {
 
-            // Prompt start options again 
-            start();
+        connection.query("INSERT INTO department (dept_name) VALUES (?)", [res.deptName.toLowerCase()], (err) => {
+            if (err) {
+                console.log(err);
+                console.log("Error when adding departments into the MySQL database");
+            }
+        });
+
+        // Prompt start options again 
+        start();
 
         }).catch((err) => {
             console.log(err);
@@ -101,19 +102,18 @@ function addNewDepartments() {
 }
 
 function addNewRoles() {
-
     // Prompt user to add a role
     inquirer.prompt(arrays.roleAdd).then((res) => {
         // Returns just the id from the roleDept response. Department_id in the emp_role table is an INT.
         let deptID = parseInt(res.roleDept.split(")")[0]);
+
         // Insert user answers into emp_role table
-        connection.query("INSERT INTO emp_role (title, salary, department_id) VALUES (?, ?, ?)", [res.roleTitle, res.roleSalary, deptID], (err) => {
+        connection.query("INSERT INTO emp_role (title, salary, department_id) VALUES (?, ?, ?)", [res.roleTitle.toLowerCase(), res.roleSalary, deptID], (err) => {
             if (err) {
                 console.log(err);
                 console.log("Error when adding departments into the MySQL database.");
             } 
         })
-
         // Prompt start options again 
         start();
     }).catch((err) => {
@@ -130,7 +130,7 @@ function addNewEmployees() {
         // Returns just the db ID from the manager response. Manager_id in table employee is an INT. 
         let managerID = parseInt(res.manager.split(")")[0]);
 
-        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [res.firstName, res.lastName, empRole, managerID], (err) => {
+        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [res.firstName.toLowerCase(), res.lastName.toLowerCase(), empRole, managerID], (err) => {
             if (err) {
                 console.log(err);
                 console.log("Error when adding departments into the MySQL database.");
@@ -349,6 +349,7 @@ function deleteRole() {
     }) 
 }
 
+// Delete an employee from the database
 function deleteEmployees() {
     inquirer.prompt(
         {
