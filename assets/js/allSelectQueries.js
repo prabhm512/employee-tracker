@@ -31,7 +31,7 @@ let departments = connection.query("SELECT id, dept_name FROM department", (err,
     }
 });
 
-let roles = connection.query("SELECT * FROM emp_role", (err, results) => {
+let roles = connection.query("SELECT emp_role.id, title, salary, dept_name FROM emp_role INNER JOIN department ON emp_role.department_id = department.id", (err, results) => {
     if (err) {
         console.log(err);
         console.log("Error when querying database for all roles.");
@@ -43,11 +43,13 @@ let roles = connection.query("SELECT * FROM emp_role", (err, results) => {
     })
 })
 
-let employees = connection.query("SELECT * FROM employee", (err, results) => {
-    if (err) {
-        console.log(err);
-        console.log("Error when querying database for all employees.");
-    }
+let employees = connection.query(
+    "SELECT employee.id, first_name, last_name, title, dept_name FROM employee INNER JOIN emp_role ON employee.role_id = emp_role.id INNER JOIN department ON emp_role.department_id = department.id", 
+    (err, results) => {
+        if (err) {
+            console.log(err);
+            console.log("Error when querying database for all employees.");
+        }
         // Push all employees into empArray
         results.forEach(element => {
             arrays.empArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
