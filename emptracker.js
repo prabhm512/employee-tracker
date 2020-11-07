@@ -59,6 +59,10 @@ function start() {
                 updateEmployeeManager();
                 break;
             
+            case "DELETE department":
+                deleteDepartment();
+                break;
+            
             default:
                 connection.end();
         }
@@ -285,5 +289,28 @@ function updateEmployeeManager() {
     }).catch((err) => {
         console.log(err);
         console.log("Error when updating employee manager.");
+    })
+}
+
+// Delete a department from the database
+function deleteDepartment() {
+    inquirer.prompt(
+        {
+            type: "list",
+            message: "Which department would you like to DELETE?",
+            name: "deleteDept",
+            choices: () => arrays.deptArray,
+            loop: false
+        }
+    ).then(res => {
+        let deptID = parseInt(res.deleteDept.slice(-2));
+        connection.query("DELETE FROM department WHERE id = ?", [deptID], (err) => {
+            if (err) throw err;
+
+            start();
+        })
+    }).catch(err => {
+        console.log(err);
+        console.log("Error when deleting departments");
     })
 }
