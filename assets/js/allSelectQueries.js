@@ -44,7 +44,7 @@ let roles = connection.query("SELECT emp_role.id, title, salary, dept_name FROM 
 })
 
 let employees = connection.query(
-    "SELECT employee.id, first_name, last_name, title, dept_name FROM employee INNER JOIN emp_role ON employee.role_id = emp_role.id INNER JOIN department ON emp_role.department_id = department.id", 
+    "SELECT employee.id, first_name, last_name, title, dept_name, (SELECT CONCAT(first_name, \" \", last_name) FROM employeetracker_db.employee emp1 WHERE id = employee.manager_id) manager FROM employeetracker_db.employee INNER JOIN employeetracker_db.emp_role ON employee.role_id = emp_role.id INNER JOIN employeetracker_db.department ON emp_role.department_id = department.id", 
     (err, results) => {
         if (err) {
             console.log(err);

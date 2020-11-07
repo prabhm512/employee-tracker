@@ -16,7 +16,7 @@
             type: "list",
             message: "What would you like to do?",
             name: "action",
-            choices: ["ADD departments", "ADD roles", "ADD employees", "VIEW departments", "VIEW roles", "VIEW employees", "UPDATE employee roles", "EXIT"],
+            choices: ["ADD departments", "ADD roles", "ADD employees", "VIEW departments", "VIEW roles", "VIEW employees", "UPDATE employee roles", "UPDATE employee manager", "EXIT"],
             loop: false 
         }
     ];
@@ -107,5 +107,26 @@
         }
     ];
 
+    const updateManager = [
+        {
+            type: "rawlist",
+            message: "Which employee's manager would you like to update?",
+            name: "empUpdate",
+            choices: () => {
+                return empArray;
+            },
+            loop: false
+        },
+        {
+            type: "rawlist",
+            message: "Who will manage this employee?",
+            name: "managerUpdate",
+            choices: () => {
+                return managerArray;
+            },
+            loop: false
+        }
+    ];
 
-module.exports = { deptArray, roleArray, empArray, managerArray, startPrompt, deptAdd, roleAdd, employeeAdd, updateRolesArray  };
+
+module.exports = { deptArray, roleArray, empArray, managerArray, startPrompt, deptAdd, roleAdd, employeeAdd, updateRolesArray, updateManager };

@@ -2,7 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const queries = require("./assets/js/allSelectQueries");
 const arrays = require("./assets/js/arrays");
-const { roleArray } = require("./assets/js/arrays");
+const { roleArray, empArray } = require("./assets/js/arrays");
 // inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
 // Create the connection information for the sql database
@@ -48,12 +48,15 @@ function start() {
                 break;
             
             case "VIEW employees": 
-                // console.table(queries.employees._results[0]);
                 viewEmployees();
                 break;
             
             case "UPDATE employee roles":
                 updateRoles();
+                break;
+
+            case "UPDATE employee manager":
+                updateEmployeeManager();
                 break;
             
             default:
@@ -158,7 +161,7 @@ function viewEmployees() {
             type: "rawlist",
             message: "How would you like to VIEW employees?",
             name: "empViewOptions",
-            choices: ["By department", "By role", "By name"]
+            choices: ["By department", "By role", "By name", "All employees"]
         }
     ).then(res => {
         if (res.empViewOptions === "By department") {
@@ -237,7 +240,29 @@ function viewEmployees() {
                     start();
                 })
             })
-        }   
+        }
+        
+        else {
+            console.table(queries.employees._results[0]);
+            start();
+        }
     });
 }
 
+function updateEmployeeManager() {
+    inquirer.prompt(arrays.updateManager).then(res => {
+        // Returns just the db ID from the empRole response. Role_id in table employee is an INT. 
+        let empID = parseInt(res.empUpdate.slice(-2));
+        // Returns just the db ID from the manager response. Manager_id in table employee is an INT. 
+        let managerID = parseInt(res.managerUpdate.slice(-2));
+
+        connection.query("UPDATE employee SET manager_id = ? WHERE id = ?", [managerID, empID], (err) => {
+            if (err) throw err;
+
+            start();
+        })
+    }).catch((err) => {
+        console.log(err);
+        console.log("Error when updating employee manager.");
+    })
+}
