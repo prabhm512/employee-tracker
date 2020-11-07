@@ -26,7 +26,7 @@ let departments = connection.query("SELECT id, dept_name FROM department", (err,
     } else {
         // Push each element of returned results into deptArray
         results.forEach(element => {
-            arrays.deptArray.push(`${element.dept_name} [ID (in db): ${element.id}]`);
+            arrays.deptArray.push(`${element.id}) ${element.dept_name}`);
         }); 
     }
 });
@@ -39,7 +39,7 @@ let roles = connection.query("SELECT emp_role.id, title, salary, dept_name FROM 
 
     // Get title and id from query in redundantQueries.js and push in to roleArray
     results.forEach(element => {
-            arrays.roleArray.push(`${element.title} [ID (in db): ${element.id}]`);
+            arrays.roleArray.push(`${element.id}) ${element.title}`);
     })
 })
 
@@ -52,7 +52,7 @@ let employees = connection.query(
         }
         // Push all employees into empArray
         results.forEach(element => {
-            arrays.empArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
+            arrays.empArray.push(`${element.id}) ${element.first_name} ${element.last_name}`);
         })
 })
 
@@ -63,7 +63,7 @@ let managers = connection.query("SELECT id, first_name, last_name FROM employee 
         console.log("Error when querying database for existing employees whose manager_id is null.");
     } else {
         results.forEach(element => {
-            arrays.managerArray.push(`${element.first_name} ${element.last_name} [ID (in db): ${element.id}]`);
+            arrays.managerArray.push(`${element.id}) ${element.first_name} ${element.last_name}`);
         });
                     
     }

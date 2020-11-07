@@ -2,7 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const queries = require("./assets/js/allSelectQueries");
 const arrays = require("./assets/js/arrays");
-const { roleArray, empArray } = require("./assets/js/arrays");
+// const { roleArray, empArray } = require("./assets/js/arrays");
 // inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
 // Create the connection information for the sql database
@@ -63,6 +63,10 @@ function start() {
                 deleteDepartment();
                 break;
             
+            // case "DELETE role":
+            //     deleteRole();
+            //     break;
+            
             default:
                 connection.end();
         }
@@ -98,7 +102,7 @@ function addNewRoles() {
     // Prompt user to add a role
     inquirer.prompt(arrays.roleAdd).then((res) => {
         // Returns just the id from the roleDept response. Department_id in the emp_role table is an INT.
-        let deptID = parseInt(res.roleDept.slice(-2));
+        let deptID = parseInt(res.roleDept.split(")")[0]);
         // Insert user answers into emp_role table
         connection.query("INSERT INTO emp_role (title, salary, department_id) VALUES (?, ?, ?)", [res.roleTitle, res.roleSalary, deptID], (err) => {
             if (err) {
@@ -119,9 +123,9 @@ function addNewEmployees() {
         
     inquirer.prompt(arrays.employeeAdd).then((res) => {
         // Returns just the db ID from the empRole response. Role_id in table employee is an INT. 
-        let empRole = parseInt(res.empRole.slice(-2));
+        let empRole = parseInt(res.empRole.split(")")[0]);
         // Returns just the db ID from the manager response. Manager_id in table employee is an INT. 
-        let managerID = parseInt(res.manager.slice(-2));
+        let managerID = parseInt(res.manager.split(")")[0]);
 
         connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [res.firstName, res.lastName, empRole, managerID], (err) => {
             if (err) {
@@ -142,8 +146,8 @@ function updateRoles() {
 
     inquirer.prompt(arrays.updateRolesArray).then((res) => {
 
-        let empID = parseInt(res.employeeID.slice(-2));
-        let roleID = parseInt(res.empRoleID.slice(-2));
+        let empID = parseInt(res.employeeID.split(")")[0]);
+        let roleID = parseInt(res.empRoleID.split(")")[0]);
 
         // Update role_ID of selected employee
         connection.query("UPDATE employee SET role_id = ? WHERE id = ?", [roleID, empID], (err) => {
@@ -181,7 +185,7 @@ function viewEmployees() {
                 }
             ).then(res => {
                 // Returns just the id from the roleDept response. Department_id in the emp_role table is an INT.
-                let deptID = parseInt(res.viewByDept.slice(-2));
+                let deptID = parseInt(res.viewByDept.split(")")[0]);
 
                 // Query db for all employees who work in the selected department
                 connection.query(`${queries.employees.sql} WHERE department.id = ${deptID}`, (err, results) => {
@@ -202,11 +206,11 @@ function viewEmployees() {
                     message: "Employees in which role would you like to VIEW?",
                     name: "viewByRole",
                     choices: () => {
-                        return roleArray;
+                        return arrays.roleArray;
                     }
                 }
             ).then(res => {
-                let roleID = parseInt(res.viewByRole.slice(-2));
+                let roleID = parseInt(res.viewByRole.split(")")[0]);
                 connection.query(`${queries.employees.sql} WHERE emp_role.id = ${roleID}`, (err, results) => {
                     if (err) throw err;
 
@@ -226,7 +230,7 @@ function viewEmployees() {
                     choices: () => arrays.managerArray
                 }
             ).then(res => {
-                let managerID = parseInt(res.viewByManager.slice(-2));
+                let managerID = parseInt(res.viewByManager.split(")")[0]);
                 connection.query(`${queries.employees.sql} WHERE manager_id = ?`, [managerID], (err, results) => {
                     if (err) throw err;
                     console.table(results)
@@ -247,7 +251,7 @@ function viewEmployees() {
                     validate: (str) => {
                         const firstName = [];
                         arrays.empArray.filter(el => {
-                            firstName.push(el.split(" ")[0]);
+                            firstName.push(el.split(" ")[1]);
                         });
 
                         if (firstName.indexOf(str) !== -1) {
@@ -277,9 +281,9 @@ function viewEmployees() {
 function updateEmployeeManager() {
     inquirer.prompt(arrays.updateManager).then(res => {
         // Returns just the db ID from the empRole response. Role_id in table employee is an INT. 
-        let empID = parseInt(res.empUpdate.slice(-2));
+        let empID = parseInt(res.empUpdate.split(")")[0]);
         // Returns just the db ID from the manager response. Manager_id in table employee is an INT. 
-        let managerID = parseInt(res.managerUpdate.slice(-2));
+        let managerID = parseInt(res.managerUpdate.split(")")[0]);
 
         connection.query("UPDATE employee SET manager_id = ? WHERE id = ?", [managerID, empID], (err) => {
             if (err) throw err;
@@ -303,7 +307,7 @@ function deleteDepartment() {
             loop: false
         }
     ).then(res => {
-        let deptID = parseInt(res.deleteDept.slice(-2));
+        let deptID = parseInt(res.deleteDept.split(")")[0]);
         connection.query("DELETE FROM department WHERE id = ?", [deptID], (err) => {
             if (err) throw err;
 
@@ -314,3 +318,4 @@ function deleteDepartment() {
         console.log("Error when deleting departments");
     })
 }
+

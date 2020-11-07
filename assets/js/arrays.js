@@ -44,7 +44,7 @@
             name: "roleSalary"
         },
         {
-            type: "rawlist",
+            type: "list",
             message: "What department is this role associated with?",
             name: "roleDept",
             choices: () => {
@@ -67,7 +67,7 @@
             name: "lastName"
         },
         {
-            type: "rawlist",
+            type: "list",
             message: "What is the role of the employee?",
             name: "empRole",
             choices: () => {
@@ -76,7 +76,7 @@
             loop: false
         },
         {
-            type: "rawlist",
+            type: "list",
             message: "Who manages the employee?",
             name: "manager",
             choices: () => {
@@ -88,7 +88,7 @@
 
     const updateRolesArray = [
         {
-            type: "rawlist",
+            type: "list",
             message: "Which employees role would you like to update?",
             name: "employeeID",
             choices: () => {
@@ -97,7 +97,7 @@
             loop: false
         },
         {
-            type: "rawlist",
+            type: "list",
             message: "What role would you like to give to the employee?",
             name: "empRoleID",
             choices: () => {
@@ -109,7 +109,7 @@
 
     const updateManager = [
         {
-            type: "rawlist",
+            type: "list",
             message: "Which employee's manager would you like to update?",
             name: "empUpdate",
             choices: () => {
@@ -118,7 +118,7 @@
             loop: false
         },
         {
-            type: "rawlist",
+            type: "list",
             message: "Who will manage this employee?",
             name: "managerUpdate",
             choices: () => {
