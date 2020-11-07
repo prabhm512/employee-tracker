@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const queries = require("./assets/js/allSelectQueries");
 const arrays = require("./assets/js/arrays");
+const { roleArray } = require("./assets/js/arrays");
 // inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
 // Create the connection information for the sql database
@@ -47,8 +48,8 @@ function start() {
                 break;
             
             case "VIEW employees": 
-                console.table(queries.employees._results[0]);
-                start();
+                // console.table(queries.employees._results[0]);
+                viewEmployees();
                 break;
             
             case "UPDATE employee roles":
@@ -148,6 +149,95 @@ function updateRoles() {
             console.log(err);
             console.log("Error when updating roles.");
         }
+    });
+}
+
+function viewEmployees() {
+    inquirer.prompt(
+        {
+            type: "rawlist",
+            message: "How would you like to VIEW employees?",
+            name: "empViewOptions",
+            choices: ["By department", "By role", "By name"]
+        }
+    ).then(res => {
+        if (res.empViewOptions === "By department") {
+            inquirer.prompt(
+                {
+                    type: "list",
+                    message: "What department's employees would you like to VIEW?",
+                    name: "viewByDept",
+                    choices: () => {
+                        return arrays.deptArray;
+                    },
+                    loop: false
+                }
+            ).then(res => {
+                // Returns just the id from the roleDept response. Department_id in the emp_role table is an INT.
+                let deptID = parseInt(res.viewByDept.slice(-2));
+
+                // Query db for all employees who work in the selected department
+                connection.query(`${queries.employees.sql} WHERE department.id = ${deptID}`, (err, results) => {
+                    if (err) throw err;
+
+                    // Log results to console as a table
+                    console.table(results);
+
+                    start();
+                })
+            })
+        }
+
+        else if (res.empViewOptions === "By role") {
+            inquirer.prompt(
+                {
+                    type: "list",
+                    message: "Employees in which role would you like to VIEW?",
+                    name: "viewByRole",
+                    choices: () => {
+                        return roleArray;
+                    }
+                }
+            ).then(res => {
+                let roleID = parseInt(res.viewByRole.slice(-2));
+                connection.query(`${queries.employees.sql} WHERE emp_role.id = ${roleID}`, (err, results) => {
+                    if (err) throw err;
+
+                    console.table(results);
+
+                    start();
+                })
+            })
+        }
+
+        else if (res.empViewOptions === "By name") {
+            inquirer.prompt(
+                {
+                    type: "input",
+                    message: "What is the FIRST name of the employee?",
+                    name: "viewByName",
+                    validate: (str) => {
+                        const firstName = [];
+                        arrays.empArray.filter(el => {
+                            firstName.push(el.split(" ")[0]);
+                        });
+
+                        if (firstName.indexOf(str) !== -1) {
+                            return true;
+                        }
+                        return "No employee with this first name works in your company.";
+                    }
+                }
+            ).then(res => {
+                connection.query(`${queries.employees.sql} WHERE employee.first_name = ?`, [res.viewByName], (err, results) => {
+                    if (err) throw err; 
+
+                    console.table(results);
+
+                    start();
+                })
+            })
+        }   
     });
 }
 

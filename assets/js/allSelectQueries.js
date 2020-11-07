@@ -72,4 +72,4 @@ let managers = connection.query("SELECT id, first_name, last_name FROM employee 
 
 connection.end();
 
-module.exports = { departments, roles, employees };
+module.exports = { departments, roles, employees, managers };
