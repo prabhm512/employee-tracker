@@ -22,7 +22,7 @@
             type: "list",
             message: "What would you like to do?",
             name: "action",
-            choices: ["ADD departments", "ADD roles", "ADD employees", "VIEW departments", "VIEW roles", "VIEW employees", "UPDATE employee roles", "UPDATE employee manager", "DELETE department", "DELETE role", "DELETE employees", "EXIT"],
+            choices: ["ADD departments", "ADD roles", "ADD employees", "VIEW departments", "VIEW roles", "VIEW employees", "VIEW cost per department", "UPDATE employee roles", "UPDATE employee manager", "DELETE department", "DELETE role", "DELETE employees", "EXIT"],
             loop: false 
         }
     ];
@@ -161,5 +161,17 @@
         }
     ];
 
+    const costArray = [
+        {
+            type: "list",
+            message: "Which department's cost would you like to check?",
+            name: "deptCost",
+            choices: () => {
+                return deptArray;
+            },
+            loop: false
+        }
+    ];
 
-module.exports = { deptArray, filteredDeptArray, roleArray, filteredRoleArray, empArray, managerArray, startPrompt, deptAdd, roleAdd, employeeAdd, updateRolesArray, updateManager };
+
+module.exports = { deptArray, filteredDeptArray, roleArray, filteredRoleArray, empArray, managerArray, startPrompt, deptAdd, roleAdd, employeeAdd, updateRolesArray, updateManager, costArray };

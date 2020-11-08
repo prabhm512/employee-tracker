@@ -49,6 +49,10 @@ function start() {
             case "VIEW employees": 
                 viewEmployees();
                 break;
+
+            case "VIEW cost per department":
+                costPerDept();
+                break;
             
             case "UPDATE employee roles":
                 updateRoles();
@@ -360,6 +364,7 @@ function deleteEmployees() {
             loop: false
         }
     ).then(res => {
+        // Extract ID from string passed into empArray.
         let empID = parseInt(res.deleteEmp.split(")")[0]);
         connection.query("DELETE FROM employee WHERE id = ?", [empID], (err) => {
             if (err) throw err;
@@ -368,3 +373,23 @@ function deleteEmployees() {
         })  
     })
 }
+
+function costPerDept() {
+    // Extract ID from string passed into deptArray.
+    inquirer.prompt(arrays.costArray).then((res) => {
+        let deptID = parseInt(res.deptCost.split(")")[0]);
+        connection.query(`${queries.deptCost.sql} WHERE department_id = ?`, [deptID], (err, results) => {
+            if (err) throw err;
+
+            console.table(results);
+
+            start();
+        })
+    }).catch((err) => {
+        if (err) {
+            console.log(err);
+            console.log("Error when calculating the cost of employees in a department.");
+        }
+    });
+}
+

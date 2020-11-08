@@ -69,7 +69,12 @@ let managers = connection.query("SELECT id, first_name, last_name FROM employee 
     }
 });
 
+// Query that outputs how much labour costs in the department selected by the user.
+let deptCost = connection.query("SELECT department.dept_name, SUM(emp_role.salary) dept_cost FROM employeetracker_db.employee INNER JOIN employeetracker_db.emp_role ON employee.role_id = emp_role.id INNER JOIN department ON emp_role.department_id = department.id", (err, results) => {
+    if (err) throw err;
+});
+
 
 connection.end();
 
-module.exports = { departments, roles, employees, managers };
+module.exports = { departments, roles, employees, managers, deptCost };
