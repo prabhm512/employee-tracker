@@ -1,34 +1,34 @@
--- Department table
+-- Departments
 INSERT INTO department (dept_name) VALUES 
-('Service'),
-('Testing'),
-('Finance'),
-('Product Development');
+('service'),
+('testing'),
+('finance'),
+('product development');
 
--- Roles table
+-- Roles
 INSERT INTO emp_role (title, salary, department_id) VALUES 
-('QA Specialist', 75000.00, 2),
-('Help Desk Technician', 45000.00, 1),
-('Frontend Developer', 55000.00, 4),
-('Budget Analyst', 60000.00, 3),
-('Accountant', 60000.00, 3),
-('Backend Developer', 80000.00, 4),
-('Technology Trainee', 40000, 4),
-('Testing Manager', 90000.00, 2),
-('Senior Software Engineer', 130000.00, 4),
-('Service Manager', 85000.00, 1),
-('Finance Manager', 130000.00, 3);
+('qa specialist', 75000.00, 2),
+('help desk technician', 45000.00, 1),
+('frontend developer', 55000.00, 4),
+('budget analyst', 60000.00, 3),
+('accountant', 60000.00, 3),
+('backend developer', 80000.00, 4),
+('technology trainee', 40000, 4),
+('testing manager', 90000.00, 2),
+('senior software engineer', 130000.00, 4),
+('service manager', 85000.00, 1),
+('finance manager', 130000.00, 3);
 
--- Employee information table
+-- Employees
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES 
-('Nathan', 'Mcneil', 3, 5),
-('Allen', 'Buck', 6, 5),
-('Ace', 'Travis', 1, 11),
-('Eva', 'Strong', 4, 7),
-('Terrel', 'Lam', 9, null),
-('Pranav', 'Deleon', 2, 8),
-('Gloria', 'Schultz', 11, null),
-('Eve', 'Thornton', 10, null),
-('Guadalupe', 'Avila', 5, 7),
-('Kiara', 'Copeland', 7, 5),
-('Abbigail', 'Beasley', 8, null);
+('nathan', 'mcneil', 3, 5),
+('allen', 'buck', 6, 5),
+('ace', 'travis', 1, 11),
+('eva', 'strong', 4, 7),
+('terrel', 'lam', 9, null),
+('pranav', 'deleon', 2, 8),
+('gloria', 'schultz', 11, null),
+('eve', 'thornton', 10, null),
+('guadalupe', 'avila', 5, 7),
+('kiara', 'copeland', 7, 5),
+('abbigail', 'beasley', 8, null);
