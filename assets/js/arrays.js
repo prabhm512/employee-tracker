@@ -1,3 +1,4 @@
+
     // Stores existing departments
     const deptArray = [];
 
@@ -36,7 +37,7 @@
             validate: (str) => {
                 // Filters deptArray to store only dept_name
                 deptArray.filter(el => {
-                    filteredDeptArray.push(el.split(" ")[1]);
+                    filteredDeptArray.push(el.split(") ")[1]);
                 })
                 
                 // Validation to ensure 1 department is only added once to the database.
@@ -112,9 +113,7 @@
             type: "list",
             message: "Who manages the employee?",
             name: "manager",
-            choices: () => {
-                return managerArray;
-            },
+            choices: () => [...managerArray, "--> This employee is a manager!"],
             loop: false
         }
     ];
