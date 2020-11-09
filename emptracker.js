@@ -1,10 +1,10 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const arrays = require("./assets/js/arrays");
-const { managerArray } = require("./assets/js/arrays");
 // inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 
 // Used in VIEW case of start function
+// Managers and employees variables are not used yet but they have a high chance of being used in further feature implementations.
 let departments, roles, managers, employees;
 
 // Create the connection information for the sql database
@@ -12,7 +12,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "mszPrabh09!",
+    password: "YOUR PASSWORD",   // TYPE YOUR PASSWORD INSIDE THE QUOTES *****************************
     database: "employeetracker_DB"
 });
 
@@ -504,14 +504,18 @@ function deleteDepartment() {
     ).then(res => {
         let deptID = parseInt(res.deleteDept.split(")")[0]);
         connection.query("DELETE FROM department WHERE id = ?", [deptID], (err) => {
-            if (err) throw err;
-            // Empty deptArray before pushing into it again
-            arrays.deptArray.length = 0;
-
-            // Run push again as new values have been added to the emp_role table
-            pushDeptsIntoArray();
-
-            start();
+            if (err) {
+                console.warn("People work in this department. It cannot be deleted!");
+                connection.end();
+            } else {
+                // Empty deptArray before pushing into it again
+                arrays.deptArray.length = 0;
+    
+                // Run push again as new values have been added to the emp_role table
+                pushDeptsIntoArray();
+    
+                start();
+            }
         })
     }).catch(err => {
         console.log(err);
@@ -537,15 +541,16 @@ function deleteRole() {
         connection.query("DELETE FROM emp_role WHERE id = ?", [roleID], (err, results) => {
             if (err) {
                 console.warn("An employee currently works in this role! Delete the employee or Update the employee role first.");
+                connection.end();
             } else {
                 console.log("Role successfully deleted!");
+                // Empty roleArray before pushing into it again
+                arrays.roleArray.length = 0;
+                // Run push again as new values have been added to the emp_role table
+                pushRolesIntoArray();
+    
+                start();
             }
-            // Empty roleArray before pushing into it again
-            arrays.roleArray.length = 0;
-            // Run push again as new values have been added to the emp_role table
-            pushRolesIntoArray();
-
-            start();
         })
     }) 
 
@@ -566,6 +571,7 @@ function deleteEmployees() {
         let empID = parseInt(res.deleteEmp.split(")")[0]);
         connection.query("DELETE FROM employee WHERE id = ?", [empID], (err) => {
             if (err) throw err;
+
             // Empty emp array before pushing into it again
             arrays.empArray.length = 0;
             // Run push again as new values have been added to the emp_role table
