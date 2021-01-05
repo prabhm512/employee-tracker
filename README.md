@@ -9,8 +9,8 @@ An intuitive Content Management System (CMS) that allows non-developers to inter
 ## Table of Contents
 
 [Installation](#installation)  
-[Usage](#usage)
-[Demostration](#demonstration)
+[Usage](#usage)                                                   
+[Demostration](#demonstration)                    
 [License](#licenses)  
 [Contributing](#contributing)  
 [Questions](#questions)
@@ -26,13 +26,11 @@ An intuitive Content Management System (CMS) that allows non-developers to inter
 
 **Important**: Node.js needs to be installed for this app to work. Also, all dependencies must be installed using 'npm i'.
 
-## Usage
-
-Allows for better business organisation, planning and management!
-
 ## Demonstration
 
 <a href="https://drive.google.com/file/d/1XOWjQuRgM_F00Mw3ydrfIzgJo6np5qRm/view?usp=sharing">Employee Tracker demo (click to open)</a>
+
+<img src="./assets/images/emp-tracker.jpg">
 
 ## Licenses
 
